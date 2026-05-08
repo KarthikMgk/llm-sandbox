@@ -1,6 +1,6 @@
 import docker
-import time
-from typing import Generator
+import asyncio
+from typing import AsyncGenerator
 from datetime import datetime
 
 class TerminalHandler:
@@ -14,7 +14,7 @@ class TerminalHandler:
         exit_code = result.exit_code
         return output, exit_code
 
-    def stream_output(self, container_id: str) -> Generator[str, None, None]:
+    async def stream_output(self, container_id: str) -> AsyncGenerator[str, None]:
         container = self.client.containers.get(container_id)
         container.exec_run(
             ["bash", "-c", "mkfifo /tmp/terminal_stream && tail -f /tmp/terminal_stream"],
@@ -28,4 +28,4 @@ class TerminalHandler:
                 if line:
                     yield line.rstrip("\n")
                 else:
-                    time.sleep(0.1)
+                    await asyncio.sleep(0.1)
