@@ -1,0 +1,74 @@
+import { useState } from 'react'
+import axios from 'axios'
+
+function Wizard({ onStart }) {
+  const [apiKey, setApiKey] = useState('')
+  const [model, setModel] = useState('minimax-01')
+  const [containerImage, setContainerImage] = useState('ubuntu:22.04')
+  const [agentKey, setAgentKey] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const [error, setError] = useState(null)
+
+  const handleSubmit = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      await axios.post('/api/config', null, {
+        params: { apiKey, model, containerImage, agentKey }
+      })
+      await axios.post('/api/sandbox/start')
+      onStart({ apiKey, model, containerImage, agentKey })
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to start sandbox. Please check your settings.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="wizard">
+      <h1>Sandbox Setup</h1>
+      <div className="form-group">
+        <label>API Key</label>
+        <input
+          type="password"
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          placeholder="Enter your API key"
+        />
+      </div>
+      <div className="form-group">
+        <label>Model</label>
+        <input
+          type="text"
+          value={model}
+          onChange={(e) => setModel(e.target.value)}
+        />
+      </div>
+      <div className="form-group">
+        <label>Container Image</label>
+        <input
+          type="text"
+          value={containerImage}
+          onChange={(e) => setContainerImage(e.target.value)}
+        />
+      </div>
+      <div className="form-group">
+        <label>Agent Key</label>
+        <input
+          type="password"
+          value={agentKey}
+          onChange={(e) => setAgentKey(e.target.value)}
+          placeholder="Agent authentication key"
+        />
+      </div>
+      <button onClick={handleSubmit} disabled={loading}>
+        {loading ? 'Starting...' : 'Start Sandbox'}
+      </button>
+      {error && <div className="error-message">{error}</div>}
+    </div>
+  )
+}
+
+export default Wizard
