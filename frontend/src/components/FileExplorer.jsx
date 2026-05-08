@@ -3,6 +3,7 @@ import axios from 'axios'
 
 function FileExplorer({ sandboxId }) {
   const [files, setFiles] = useState([])
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -12,8 +13,9 @@ function FileExplorer({ sandboxId }) {
           params: { sandbox_id: sandboxId }
         })
         setFiles(response.data)
-      } catch (error) {
-        // Files not available
+        setError(null)
+      } catch (err) {
+        setError('Failed to load files')
       }
     }
     fetchFiles()
@@ -22,6 +24,7 @@ function FileExplorer({ sandboxId }) {
   return (
     <div className="file-explorer">
       <h3>Files</h3>
+      {error && <div className="error-message">{error}</div>}
       <div className="file-tree">
         <div className="file-item">/</div>
         {files.map((file) => (

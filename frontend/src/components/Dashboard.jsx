@@ -8,14 +8,17 @@ import axios from 'axios'
 function Dashboard({ config }) {
   const [sandbox, setSandbox] = useState(null)
   const [timelineEvents, setTimelineEvents] = useState([])
+  const [statusError, setStatusError] = useState(null)
+  const [timelineError, setTimelineError] = useState(null)
 
   useEffect(() => {
     const fetchStatus = async () => {
       try {
         const response = await axios.get('/api/sandbox/status')
         setSandbox(response.data)
+        setStatusError(null)
       } catch (error) {
-        // Sandbox not yet started or not found
+        setStatusError('Failed to fetch sandbox status')
       }
     }
     fetchStatus()
@@ -29,7 +32,7 @@ function Dashboard({ config }) {
         const response = await axios.get('/api/timeline')
         setTimelineEvents(response.data)
       } catch (error) {
-        // Timeline not available
+        setTimelineError('Failed to fetch timeline')
       }
     }
     fetchTimeline()
@@ -43,6 +46,8 @@ function Dashboard({ config }) {
         <span>sandbox-{sandbox?.id || '...'}</span>
         <span>{sandbox?.status || '...'}</span>
       </header>
+      {statusError && <div className="error-message">{statusError}</div>}
+      {timelineError && <div className="error-message">{timelineError}</div>}
       <div className="main">
         <div className="left-panel">
           <Terminal sandboxId={sandbox?.id} />

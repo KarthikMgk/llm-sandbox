@@ -8,16 +8,19 @@ function Wizard({ onStart }) {
   const [agentKey, setAgentKey] = useState('')
   const [loading, setLoading] = useState(false)
 
+  const [error, setError] = useState(null)
+
   const handleSubmit = async () => {
     setLoading(true)
+    setError(null)
     try {
       await axios.post('/api/config', null, {
         params: { apiKey, model, containerImage, agentKey }
       })
       await axios.post('/api/sandbox/start')
       onStart({ apiKey, model, containerImage, agentKey })
-    } catch (error) {
-      console.error('Failed to start sandbox:', error)
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to start sandbox. Please check your settings.')
     } finally {
       setLoading(false)
     }
@@ -63,6 +66,7 @@ function Wizard({ onStart }) {
       <button onClick={handleSubmit} disabled={loading}>
         {loading ? 'Starting...' : 'Start Sandbox'}
       </button>
+      {error && <div className="error-message">{error}</div>}
     </div>
   )
 }
