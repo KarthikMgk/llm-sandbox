@@ -1,0 +1,16 @@
+repos:
+  - repo: local
+    hooks:
+      - id: tests-and-types
+        name: tests-and-types
+        entry: bash -c 'cd backend && python -m pytest tests/ -v --tb=short 2>&1 | tail -20 && echo "---MYPY---" && python -m mypy . --ignore-missing-imports 2>&1 | tail -20'
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
